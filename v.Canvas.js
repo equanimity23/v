@@ -4,7 +4,6 @@ v.Canvas = function(oContainer, nW, nH) {
 		_oThis = this;
 		
 	var _construct = function() {
-			console.log('construct');
 			_oCanvas = document.createElement('canvas');
 			_oCanvas.setAttribute('width', nW + 'px');
 			_oCanvas.setAttribute('height', nH + 'px');
@@ -28,13 +27,18 @@ v.Canvas = function(oContainer, nW, nH) {
 	
 	this.moveTo = function(nX, nY) {
 		_oContext.beginPath();
-		_oContext.moveTo(nX, nY);
+		_oContext.moveTo(nX-0.5, nY-0.5);
 	}
 
-	this.lineTo = function(nX, nY) {
-		_oContext.strokeStyle = '#000000';
-		_oContext.lineTo(nX, nY);
+	this.lineTo = function(nX, nY, nLineWidth, sColor) {
+		nLineWidth = nLineWidth || 1;
+		sColor     = sColor     || '#000000';
+
+		_oContext.lineWidth   = nLineWidth;
+		_oContext.strokeStyle = sColor;
+		_oContext.lineTo(nX-0.5, nY-0.5);
 		_oContext.stroke();
+		_oContext.closePath();
 	}
 	
 	this.fill = function(nX, nY, aColor, aBgColor) {
@@ -50,6 +54,10 @@ v.Canvas = function(oContainer, nW, nH) {
 		}, 200);
 	}
 	
+	this.clear = function(sColor) {
+		_oContext.clearRect(0, 0, nW, nH);
+	}
+	
 	this.hasColor = function(nX, nY, aColor) {
 		var aPixel = this.getPixel(nX, nY);
 		for (var n=0; n<aColor.length; n++) {
@@ -58,6 +66,38 @@ v.Canvas = function(oContainer, nW, nH) {
 			}
 		}
 		return true;
+	}
+	
+	this.circle = function(nX, nY, nR, sColor) {
+		_oContext.beginPath();
+		_oContext.arc(nX, nY, nR, 0, 2*Math.PI);
+		_oContext.strokeStyle = sColor;
+		_oContext.stroke();
+		_oContext.closePath();
+	}
+	
+	this.text = function(sText, nX, nY, bFill, sColor, nSize, sFont) {
+		bFill  = bFill  || false;
+		sColor = sColor || '#000000';
+		nSize  = nSize  || 12;
+		sFont  = sFont  || 'arial';
+		
+		_oContext.font         = nSize + 'px ' + sFont;
+		_oContext.textAlign    = 'center';
+		_oContext.textBaseline = 'middle';
+		
+		var sTemp;
+		if (bFill) {
+			sTemp = _oContext.fillStyle;
+			_oContext.fillStyle = sColor;
+			_oContext.fillText(sText, nX, nY);
+			_oContext.fillStyle = sTemp;
+		} else {
+			sTemp = _oContext.strokeStyle;
+			_oContext.strokeStyle = sColor;
+			_oContext.strokeText(sText, nX, nY);
+			_oContext.strokeStyle = sTemp;
+		}
 	}
 
 	_construct();
